@@ -2,6 +2,8 @@
 using System.IO;
 using System.Text;
 
+using Amemiya.Extensions;
+
 namespace ScriptDecoder
 {
     internal class Program
@@ -11,6 +13,7 @@ namespace ScriptDecoder
             if (args.Length == 0)
             {
                 Console.WriteLine("Usage: ScriptDecoder.exe <script_file>");
+                Console.ReadKey();
                 return;
             }
 
@@ -21,50 +24,56 @@ namespace ScriptDecoder
                 new StreamWriter(new FileStream(Path.GetFileNameWithoutExtension(fileInput) + ".txt",
                                                 FileMode.Create));
 
-            int content;
+            var scriptBuffer = br.ReadBytes((int) br.BaseStream.Length);
+            br.Close();
+
+            int headerLength = 0;
 
             // Check whether the file is in new format.
-            // The most significant thing is, the new format always have the magic "BurikoCompiledScript".
+            // The most significant thing is the new format have the magic "BurikoCompiledScriptVer1.00\x00".
             // The difference between old and new is that, the old one DOES NOT have the HEADER which has
             // the length discribed at [0x1C] as a DWORD.
-            if (br.ReadBytes(20) == new byte[]
-                {
-                    0x42, 0x75, 0x72, 0x69, 0x6B, 0x6F, 0x43, 0x6F, 0x6D, 0x70,
-                    0x69, 0x6C, 0x65, 0x64, 0x53, 0x63, 0x72, 0x69, 0x70, 0x74
-                })
+            if (
+                scriptBuffer.Slice(0, 0x1C)
+                            .EqualWith(new byte[]
+                                {
+                                    0x42, 0x75, 0x72, 0x69, 0x6B,
+                                    0x6F, 0x43, 0x6F, 0x6D, 0x70,
+                                    0x69, 0x6C, 0x65, 0x64, 0x53,
+                                    0x63, 0x72, 0x69, 0x70, 0x74,
+                                    0x56, 0x65, 0x72, 0x31, 0x2E,
+                                    0x30, 0x30, 0x00
+                                }))
             {
-                content = 0x1C + BitConverter.ToInt32(br.ReadBytes((int) br.BaseStream.Length), 0x1C);
+                headerLength = 0x1C + BitConverter.ToInt32(scriptBuffer, 0x1C);
             }
-            else
-            {
-                content = 0;
-            }
+            // else headerLength = 0;
 
-            br.BaseStream.Position = content;
+            // Remove HEADER.
+            scriptBuffer = scriptBuffer.Slice(headerLength, scriptBuffer.Length);
 
             // Get the text offset.
             // The offset is always next to 0x00000001, which located at [0x18] (HEADER length not included).
-            int intFirstValidOffset = BitConverter.ToInt32(
-                br.ReadBytes((int) br.BaseStream.Length - content), 0x18);
-
-            br.BaseStream.Position = content;
-
-            byte[] bytesFileInput = br.ReadBytes((int) br.BaseStream.Length - content);
-
-            br.Close();
+            int firstTextOffset = BitConverter.ToInt32(scriptBuffer, 0x18);
 
             // Text offset is always next to 0x00000003.
-            // To get the actual offset ,combine this value with HEADER length.
-            int intTextOffsetLabel = FindBytes(bytesFileInput, new byte[] {0, 3, 0, 0, 0}, 0);
+            int intTextOffsetLabel = scriptBuffer.IndexOf(new byte[] {0, 3, 0, 0, 0}, 0, false);
 
-            while (intTextOffsetLabel != -1)
+            while (intTextOffsetLabel != -1 && intTextOffsetLabel < firstTextOffset)
             {
-                int intTextOffset = BitConverter.ToInt32(bytesFileInput, intTextOffsetLabel + 5);
-                byte[] bytesTextBlock = CopyBlock(bytesFileInput, intTextOffset,
-                                                  (FindByte(bytesFileInput, 0, intTextOffset) - intTextOffset));
+                // To get the actual offset, combine intTextOffsetLabel with 5.
+                intTextOffsetLabel += 5;
 
-                // We should always do the check in case of we modify some important control bytes.
-                if (intTextOffset > intFirstValidOffset)
+                // We should plus intTextOffsetLabel with 5 because the current intTextOffsetLabel
+                // is pointed to 0003000000.
+                int intTextOffset = BitConverter.ToInt32(scriptBuffer, intTextOffsetLabel);
+                // Look up the text in original buffer.
+                byte[] bytesTextBlock = scriptBuffer.Slice(intTextOffset,
+                                                           scriptBuffer.IndexOf(new byte[] {0x00},
+                                                                                intTextOffset, false));
+
+                // We should always do the check in case of the modification of some important control bytes.
+                if (intTextOffset > firstTextOffset)
                 {
                     if (bytesTextBlock != null)
                     {
@@ -72,63 +81,18 @@ namespace ScriptDecoder
                         string strText = Encoding.GetEncoding(932)
                                                  .GetString(bytesTextBlock)
                                                  .Replace("\n", @"\n");
+
                         bw.WriteLine("<{0},{1},{2}>{3}", intTextOffsetLabel, intTextOffset,
                                      bytesTextBlock.Length, strText);
                     }
                 }
 
-                intTextOffsetLabel = FindBytes(bytesFileInput, new byte[] {0, 3, 0, 0, 0},
-                                               intTextOffsetLabel + 1);
+                intTextOffsetLabel = scriptBuffer.IndexOf(new byte[] {0, 3, 0, 0, 0}, intTextOffsetLabel,
+                                                          false);
             }
 
             bw.Close();
             //Console.ReadLine();
         }
-
-        private static int FindByte(byte[] bytesInput, byte pattern, int intStart)
-        {
-            for (int i = intStart; i < bytesInput.Length; i++)
-            {
-                if (i <= 0)
-                    return -1;
-
-                if (bytesInput[i] == pattern)
-                    return i;
-            }
-            return -1;
-        }
-
-        private static int FindBytes(byte[] bytesInput, byte[] bytesFind, int intStart)
-        {
-            for (int index = intStart; index <= (bytesInput.Length - bytesFind.Length); index++)
-            {
-                if (BitConverter.ToString(CopyBlock(bytesInput, index, bytesFind.Length)) ==
-                    BitConverter.ToString(bytesFind))
-                    return index;
-            }
-            return -1;
-        }
-
-        private static byte[] CopyBlock(byte[] bytesOrg, int intStart, int intLength)
-        {
-            try
-            {
-                var byteOutput = new byte[intLength];
-
-                for (int i = 0; i < intLength; i++)
-                {
-                    byteOutput[i] = bytesOrg[intStart + i];
-                }
-                return byteOutput;
-            }
-            catch (Exception e)
-            {
-                // In the processing, there may be many Overflow Exceptions.
-                // We should just ignore them.
-                Console.WriteLine("{0}{1}", e.Message, intStart);
-                return null;
-            }
-        }
-
     }
 }

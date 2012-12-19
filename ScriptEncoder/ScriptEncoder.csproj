@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F85893B0-B8DF-4021-AB12-4D6EFCB1A571}</ProjectGuid>
+    <ProjectGuid>{FDD242B6-58BF-49D3-A7DA-A3C58EF6EF9B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ScriptDecoder</RootNamespace>
-    <AssemblyName>ScriptDecoder</AssemblyName>
+    <RootNamespace>ScriptEncoder</RootNamespace>
+    <AssemblyName>ScriptEncoder</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -41,7 +41,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Amemiya.Extensions.ArrayExtensions.cs" />
-    <Compile Include="Amemiya.Extensions.StreamExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
