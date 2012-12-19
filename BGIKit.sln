@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptDecoder", "ScriptDecoder\ScriptDecoder.csproj", "{F85893B0-B8DF-4021-AB12-4D6EFCB1A571}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F85893B0-B8DF-4021-AB12-4D6EFCB1A571}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F85893B0-B8DF-4021-AB12-4D6EFCB1A571}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F85893B0-B8DF-4021-AB12-4D6EFCB1A571}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F85893B0-B8DF-4021-AB12-4D6EFCB1A571}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
