@@ -63,6 +63,7 @@ namespace ScriptDecoder
                 byte[] bytesTextBlock = CopyBlock(bytesFileInput, intTextOffset,
                                                   (FindByte(bytesFileInput, 0, intTextOffset) - intTextOffset));
 
+                // We should always do the check in case of we modify some important control bytes.
                 if (intTextOffset > intFirstValidOffset)
                 {
                     if (bytesTextBlock != null)
