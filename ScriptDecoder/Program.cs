@@ -27,6 +27,7 @@ namespace ScriptDecoder
             var scriptBuffer = br.ReadBytes((int) br.BaseStream.Length);
             br.Close();
 
+            // headerLength includes MAGIC and @[0x1C].
             int headerLength = 0;
 
             // Check whether the file is in new format.
@@ -64,8 +65,6 @@ namespace ScriptDecoder
                 // To get the actual offset, combine intTextOffsetLabel with 5.
                 intTextOffsetLabel += 5;
 
-                // We should plus intTextOffsetLabel with 5 because the current intTextOffsetLabel
-                // is pointed to 0003000000.
                 int intTextOffset = BitConverter.ToInt32(scriptBuffer, intTextOffsetLabel);
                 // Look up the text in original buffer.
                 byte[] bytesTextBlock = scriptBuffer.Slice(intTextOffset,
@@ -87,6 +86,7 @@ namespace ScriptDecoder
                     }
                 }
 
+                // Search for the next.
                 intTextOffsetLabel = scriptBuffer.IndexOf(new byte[] {0, 3, 0, 0, 0}, intTextOffsetLabel,
                                                           false);
             }
