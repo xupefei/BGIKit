@@ -66,14 +66,14 @@ namespace ScriptDecoder
                 intTextOffsetLabel += 5;
 
                 int intTextOffset = BitConverter.ToInt32(scriptBuffer, intTextOffsetLabel);
-                // Look up the text in original buffer.
-                byte[] bytesTextBlock = scriptBuffer.Slice(intTextOffset,
-                                                           scriptBuffer.IndexOf(new byte[] {0x00},
-                                                                                intTextOffset, false));
-
                 // We should always do the check in case of the modification of some important control bytes.
-                if (intTextOffset > firstTextOffset)
+                if (intTextOffset > firstTextOffset && intTextOffset < scriptBuffer.Length)
                 {
+                    // Look up the text in original buffer.
+                    byte[] bytesTextBlock = scriptBuffer.Slice(intTextOffset,
+                                                                   scriptBuffer.IndexOf(new byte[] {0x00},
+                                                                                        intTextOffset, false));
+
                     if (bytesTextBlock != null)
                     {
                         // BGI treat 0x0A as new line.

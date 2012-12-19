@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Text;
 
+using Amemiya.Extensions;
+
 namespace ScriptEncoder
 {
-    class Program
+    internal class Program
     {
         private static void Main(string[] args)
         {
@@ -15,68 +19,81 @@ namespace ScriptEncoder
                 return;
             }
 
-            string strFileInput = args[0];
+            string fileInput = args[0];
 
             // Load script file.
-            var br = new BinaryReader(new FileStream(strFileInput.Replace(".txt", ""), FileMode.Open));
+            var br = new BinaryReader(new FileStream(fileInput.Replace(".txt", ""), FileMode.Open));
 
-            br.BaseStream.Position = 0x1C;
-            int headerLength = br.ReadInt32();
-            br.BaseStream.Position += 0x24 + headerLength - 4;
-            int textStartPostion = br.ReadInt32();
-            br.BaseStream.Position = 0;
-
-            // Write Header
-            var headerBuffer = br.ReadBytes(0x1C + headerLength);
-
-            var msCommands = new MemoryStream(br.ReadBytes(textStartPostion));
-
-            #region text
-
-            var msTexts = new MemoryStream();
-
-            #region fix for first text
-
-            while (br.PeekChar() != 0x00)
-            {
-                msTexts.Write(br.ReadBytes(1), 0, 1);
-            }
-            msTexts.WriteByte(0);
-
-            #endregion fix for first text
-
-            var sr = new StreamReader(strFileInput, Encoding.UTF8, true);
-            while (!sr.EndOfStream)
-            {
-                string line = sr.ReadLine();
-
-                if (!line.StartsWith("<"))
-                    continue;
-
-                int[] infos = GetLineInfo(line);
-
-                msCommands.Position = infos[0];
-                msCommands.Write(BitConverter.GetBytes(msTexts.Position + msCommands.Length), 0, 4);
-
-                byte[] text = Encoding.GetEncoding(936).GetBytes(GetText(line));
-                msTexts.Write(text, 0, text.Length);
-                msTexts.WriteByte(0x00);
-            }
-
-            #endregion text
-
-            var bw = new BinaryWriter(new FileStream(strFileInput + ".new", FileMode.Create));
-            bw.Write(headerBuffer);
-            bw.Write(msCommands.ToArray());
-            bw.Write(msTexts.ToArray());
-
+            var scriptBuffer = br.ReadBytes((int) br.BaseStream.Length);
             br.Close();
+
+            // Load translation file.
+            var sr = new StreamReader(fileInput, Encoding.UTF8, true);
+            var lines = sr.ReadToEnd().Replace("\r\n", "\n").Split('\n');
+            sr.Close();
+            if (lines.Length == 0)
+                return;
+
+            // headerLength includes MAGIC and @[0x1C].
+            int headerLength = 0;
+
+            // Check whether the file is in new format.
+            // The most significant thing is the new format have the magic "BurikoCompiledScriptVer1.00\x00".
+            // The difference between old and new is that, the old one DOES NOT have the HEADER which has
+            // the length discribed at [0x1C] as a DWORD.
+            if (
+                scriptBuffer.Slice(0, 0x1C)
+                            .EqualWith(new byte[]
+                                {
+                                    0x42, 0x75, 0x72, 0x69, 0x6B,
+                                    0x6F, 0x43, 0x6F, 0x6D, 0x70,
+                                    0x69, 0x6C, 0x65, 0x64, 0x53,
+                                    0x63, 0x72, 0x69, 0x70, 0x74,
+                                    0x56, 0x65, 0x72, 0x31, 0x2E,
+                                    0x30, 0x30, 0x00
+                                }))
+            {
+                headerLength = 0x1C + BitConverter.ToInt32(scriptBuffer, 0x1C);
+            }
+            // else headerLength = 0;
+
+
+            // Get control bytes from original buffer.
+            var controlStream =
+                new MemoryStream(scriptBuffer.Slice(headerLength, GetSmallestOffset(lines) + headerLength));
+
+            // Let's begin.
+            var textStream = new MemoryStream();
+            foreach (var line in lines)
+            {
+                if (String.IsNullOrEmpty(line)) continue;
+
+                var info = GetLineInfo(line);
+                controlStream.WriteInt32(info[0], (int) (controlStream.Length + textStream.Length));
+                textStream.WriteBytes(Encoding.GetEncoding(936).GetBytes(GetText(line)));
+                textStream.WriteByte(0x00);
+            }
+
+            // Build new script file.
+            var bw = new BinaryWriter(new FileStream(fileInput + ".new", FileMode.Create));
+            // Write HEADER.
+            if (headerLength != 0) bw.Write(scriptBuffer.Slice(0, headerLength));
+            // Control bytes.
+            bw.Write(controlStream.ToArray());
+            // Text bytes.
+            bw.Write(textStream.ToArray());
             bw.Close();
+        }
+
+        private static int GetSmallestOffset(IEnumerable<string> lines)
+        {
+            return lines.Min(line => String.IsNullOrEmpty(line) ? Int32.MaxValue : GetLineInfo(line)[1]);
         }
 
         private static int[] GetLineInfo(string line)
         {
-            string[] s = line.Substring(line.IndexOf('<') + 1, line.IndexOf('>') - line.IndexOf('<') - 1).Split(',');
+            string[] s =
+                line.Substring(line.IndexOf('<') + 1, line.IndexOf('>') - line.IndexOf('<') - 1).Split(',');
 
             var i = new int[3];
             i[0] = Int32.Parse(s[0]);
@@ -89,18 +106,6 @@ namespace ScriptEncoder
         private static string GetText(string line)
         {
             return line.Substring(line.IndexOf('>') + 1).Replace(@"\n", "\x0A");
-        }
-
-        public static Int32 ReadInt32(MemoryStream ms)
-        {
-            return BitConverter.ToInt32(ReadBytes(ms, 4), 0);
-        }
-
-        public static byte[] ReadBytes(MemoryStream ms, int length)
-        {
-            var b = new byte[length];
-            ms.Read(b, 0, length);
-            return b;
         }
     }
 }

@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Amemiya.Extensions.ArrayExtensions.cs" />
+    <Compile Include="Amemiya.Extensions.StreamExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
