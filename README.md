@@ -13,7 +13,7 @@ A solution for translators about script files in Ethornell Buriko General Interp
 ###SwapNameAndSentence
 > Swap the position of speaker's name and his/her sentence.
 > 
-> Only for some games which have old script format (eg. `FORTUNE ARTERIAL`, `Tayutama: Kiss on my Deity (¥¿¥æ¥¿¥Þ -Kiss on my Deity-)`).
+> Only for some games which have old script format (eg. `FORTUNE ARTERIAL`, `Tayutama: Kiss on my Deity (ã‚¿ãƒ¦ã‚¿ãƒž -Kiss on my Deity-)`).
 
 ##I want to know more about BGI / I want to learn how to translate Galgames into Chinese
 Coming soon
