@@ -5,6 +5,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptDecoder", "ScriptDeco
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptEncoder", "ScriptEncoder\ScriptEncoder.csproj", "{FDD242B6-58BF-49D3-A7DA-A3C58EF6EF9B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwapNameAndSentence", "SwapNameAndSentence\SwapNameAndSentence.csproj", "{BDCC48D9-9943-4E71-93A7-5677F7F3CFFC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8B83BF24-C934-4C6B-A9D0-0609D221917E}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +26,10 @@ Global
 		{FDD242B6-58BF-49D3-A7DA-A3C58EF6EF9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDD242B6-58BF-49D3-A7DA-A3C58EF6EF9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FDD242B6-58BF-49D3-A7DA-A3C58EF6EF9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDCC48D9-9943-4E71-93A7-5677F7F3CFFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDCC48D9-9943-4E71-93A7-5677F7F3CFFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDCC48D9-9943-4E71-93A7-5677F7F3CFFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDCC48D9-9943-4E71-93A7-5677F7F3CFFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
