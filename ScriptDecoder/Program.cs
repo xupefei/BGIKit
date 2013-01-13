@@ -54,8 +54,18 @@ namespace ScriptDecoder
             scriptBuffer = scriptBuffer.Slice(headerLength, scriptBuffer.Length);
 
             // Get the text offset.
-            // The offset is always next to 0x00000001, which located at [0x18] (HEADER length not included).
-            int firstTextOffset = BitConverter.ToInt32(scriptBuffer, 0x18);
+            // The offset is always next to 0x00000001 (HEADER length not included).
+            int firstTextOffset;
+            int offset = scriptBuffer.IndexOf(new byte[] {1, 0, 0, 0}, 0, false);
+            // Avoid possible overflow.
+            if (offset < 0 || offset > 128)
+            {
+                firstTextOffset = 0;
+            }
+            else
+            {
+                firstTextOffset = BitConverter.ToInt32(scriptBuffer, offset + 4);
+            }
 
             // Text offset is always next to 0x00000003.
             int intTextOffsetLabel = scriptBuffer.IndexOf(new byte[] {0, 3, 0, 0, 0}, 0, false);
