@@ -15,7 +15,10 @@ A solution for translators about script files in Ethornell Buriko General Interp
 > 
 > Only for some games which have old script format (eg. `FORTUNE ARTERIAL`, `Tayutama: Kiss on my Deity (タユタマ -Kiss on my Deity-)`).
 
+###SysgrpConverter
+> Convert file between `sysgrp` format and standard bmp format.
+
 ##I want to know more about BGI / I want to learn how to translate Galgames into Chinese
-Coming soon
+Read http://i.watashi.me/posts/1.html.
 _______________
 by [Amemiya](https://plus.google.com/104849771033212826335), 2012.
