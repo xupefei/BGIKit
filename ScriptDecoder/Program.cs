@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-
 using Amemiya.Extensions;
 
 namespace ScriptDecoder
@@ -53,10 +52,11 @@ namespace ScriptDecoder
             // Remove HEADER.
             scriptBuffer = scriptBuffer.Slice(headerLength, scriptBuffer.Length);
 
+            // TODO: Analyze more about this offset. Sometime it is marked as 0x00000001 and sometime 0x0000007F.
             // Get the text offset.
-            // The offset is always next to 0x00000001 (HEADER length not included).
+            // The offset is always next to 0x0000007F (HEADER length not included).
             int firstTextOffset;
-            int offset = scriptBuffer.IndexOf(new byte[] {1, 0, 0, 0}, 0, false);
+            int offset = scriptBuffer.IndexOf(new byte[] {0x7F, 0, 0, 0}, 0, false);
             // Avoid possible overflow.
             if (offset < 0 || offset > 128)
             {
@@ -81,8 +81,8 @@ namespace ScriptDecoder
                 {
                     // Look up the text in original buffer.
                     byte[] bytesTextBlock = scriptBuffer.Slice(intTextOffset,
-                                                                   scriptBuffer.IndexOf(new byte[] {0x00},
-                                                                                        intTextOffset, false));
+                                                               scriptBuffer.IndexOf(new byte[] {0x00},
+                                                                                    intTextOffset, false));
 
                     if (bytesTextBlock != null)
                     {

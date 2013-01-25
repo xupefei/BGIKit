@@ -47,12 +47,12 @@ namespace SysgrpConverter
 
             using (var bw = new BinaryWriter(new FileStream(strBmpFile + ".out", FileMode.Create)))
             {
-                bw.Write((Int16)width);
-                bw.Write((Int16)Math.Abs(height));
-                bw.Write((Int16)depth);
-                bw.Write((Int16)0);
-                bw.Write((Int32)0);
-                bw.Write((Int32)0);
+                bw.Write((Int16) width);
+                bw.Write((Int16) Math.Abs(height));
+                bw.Write((Int16) depth);
+                bw.Write((Int16) 0);
+                bw.Write((Int32) 0);
+                bw.Write((Int32) 0);
                 bw.Write(bits);
 
                 bw.Close();
@@ -73,7 +73,7 @@ namespace SysgrpConverter
                 depth = br.ReadInt16();
 
                 br.BaseStream.Position = 0x10;
-                bits = br.ReadBytes((int)br.BaseStream.Length - 0x10);
+                bits = br.ReadBytes((int) br.BaseStream.Length - 0x10);
                 br.Close();
             }
 
@@ -106,17 +106,17 @@ namespace SysgrpConverter
             //height
             ms.Write(BitConverter.GetBytes(height), 0, 4);
             //nplanes
-            ms.Write(BitConverter.GetBytes((Int16)1), 0, 2);
+            ms.Write(BitConverter.GetBytes((Int16) 1), 0, 2);
             //bitspp
-            ms.Write(BitConverter.GetBytes((Int16)depth), 0, 2);
+            ms.Write(BitConverter.GetBytes((Int16) depth), 0, 2);
             //set other info to 0
             ms.Write(new byte[]
-                         {
-                             0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0,
-                         }, 0, 24);
+                {
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0,
+                }, 0, 24);
             //write bits
             ms.Write(bits, 0, bits.Length);
 
