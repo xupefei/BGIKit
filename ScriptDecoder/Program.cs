@@ -73,9 +73,7 @@ namespace ScriptDecoder
             while (intTextOffsetLabel != -1 && intTextOffsetLabel < firstTextOffset)
             {
                 // To get the actual offset, combine intTextOffsetLabel with 5.
-                intTextOffsetLabel += 5;
-
-                int intTextOffset = BitConverter.ToInt32(scriptBuffer, intTextOffsetLabel);
+                int intTextOffset = BitConverter.ToInt32(scriptBuffer, intTextOffsetLabel + 5);
                 // We should always do the check in case of the modification of some important control bytes.
                 if (intTextOffset > firstTextOffset && intTextOffset < scriptBuffer.Length)
                 {
@@ -91,13 +89,13 @@ namespace ScriptDecoder
                                                  .GetString(bytesTextBlock)
                                                  .Replace("\n", @"\n");
 
-                        bw.WriteLine("<{0},{1},{2}>{3}", intTextOffsetLabel, intTextOffset,
+                        bw.WriteLine("<{0},{1},{2}>{3}", intTextOffsetLabel + 5, intTextOffset,
                                      bytesTextBlock.Length, strText);
                     }
                 }
 
                 // Search for the next.
-                intTextOffsetLabel = scriptBuffer.IndexOf(new byte[] {0, 3, 0, 0, 0}, intTextOffsetLabel,
+                intTextOffsetLabel = scriptBuffer.IndexOf(new byte[] {0, 3, 0, 0, 0}, intTextOffsetLabel + 1,
                                                           false);
             }
 
