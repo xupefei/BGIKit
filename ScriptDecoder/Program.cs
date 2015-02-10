@@ -70,7 +70,7 @@ namespace ScriptDecoder
             // Text offset is always next to 0x00000003.
             int intTextOffsetLabel = scriptBuffer.IndexOf(new byte[] {0, 3, 0, 0, 0}, 0, false);
 
-            while (intTextOffsetLabel != -1 && intTextOffsetLabel > firstTextOffset)
+            while (intTextOffsetLabel != -1)
             {
                 // To get the actual offset, combine intTextOffsetLabel with 5.
                 int intTextOffset = BitConverter.ToInt32(scriptBuffer, intTextOffsetLabel + 5);
